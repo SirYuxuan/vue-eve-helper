@@ -37,6 +37,15 @@ const actions = {
   async setAllRoutes({ commit }) {
     let { data } = await build()
     data.push({ path: '*', redirect: '/404', hidden: true })
+    data.forEach(function (item, index, arr) {
+      if (item.type === 1) {
+        data[index] = {
+          path: '',
+          component: 'Layout',
+          children: [item],
+        }
+      }
+    })
     let accessRoutes = convertRouter(data)
     commit('setAllRoutes', accessRoutes)
     return accessRoutes

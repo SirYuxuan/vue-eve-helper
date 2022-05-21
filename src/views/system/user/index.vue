@@ -178,7 +178,7 @@
 </template>
 
 <script>
-  import { doGet } from '@/api/curd/crud'
+  import { doGet } from '@/api/crud/crud'
   import CRUD, { presenter, header, form, crud } from '@/components/Crud/crud'
   import CrudOperation from '@/components/Crud/CRUD.operation'
   import RrOperation from '@/components/Crud/RR.operation'

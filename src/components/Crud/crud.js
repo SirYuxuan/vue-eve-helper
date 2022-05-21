@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { parseTime, downloadFile } from '@/utils'
-import { doGet, download } from '@/api/curd/crud'
+import { doGet, download } from '@/api/crud/crud'
 
 let tempData = []
 

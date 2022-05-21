@@ -1,4 +1,4 @@
-import {doGet} from "@/api/curd/crud";
+import {doGet} from "@/api/crud/crud";
 
 /**
  * @author

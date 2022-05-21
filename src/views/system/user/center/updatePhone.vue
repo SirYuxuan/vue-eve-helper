@@ -54,7 +54,7 @@
 <script>
 import {sendPhoneCode, updatePhone} from '@/api/system/user'
 import HeyUI from "heyui"
-import {doGet} from "@/api/curd/crud";
+import {doGet} from "@/api/crud/crud";
 import {isEmail, isPhone, userValid} from "@/utils/validate";
 export default {
   props: {

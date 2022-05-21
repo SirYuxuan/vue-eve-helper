@@ -86,7 +86,7 @@
         <template slot-scope="scope">
           <udOperation
             :data="scope.row"
-            :permission="{}"
+            :permission="permission"
             msg="确定删除吗,如果存在下级节点则一并删除，此操作不能撤销！"
           />
         </template>
@@ -292,7 +292,7 @@
   import '@riophae/vue-treeselect/dist/vue-treeselect.css'
   import { LOAD_CHILDREN_OPTIONS } from '@riophae/vue-treeselect'
   import DateRangePicker from '@/components/DateRangePicker'
-  import { doGet } from '@/api/curd/crud'
+  import { doGet } from '@/api/crud/crud'
   const defaultForm = {
     id: null,
     title: null,

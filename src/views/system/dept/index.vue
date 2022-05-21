@@ -104,7 +104,7 @@ import CrudOperation from '@/components/Crud/CRUD.operation'
 import RrOperation from '@/components/Crud/RR.operation'
 import UdOperation from '@/components/Crud/UD.operation'
 import DateRangePicker from '@/components/DateRangePicker'
-import {doGet} from "@/api/curd/crud";
+import {doGet} from "@/api/crud/crud";
 
 const defaultForm = { id: null, name: null, isTop: '1', subCount: 0, pid: null, sort: 999, enabled: 'true' }
 export default {

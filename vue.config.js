@@ -37,10 +37,6 @@ process.env.VUE_APP_UPDATE_TIME = time
 process.env.VUE_APP_VERSION = version
 
 const resolve = (dir) => path.join(__dirname, dir)
-const mockServer = () => {
-  if (process.env.NODE_ENV === 'development') return require('./mock')
-  else return ''
-}
 
 module.exports = {
   publicPath,
@@ -58,7 +54,6 @@ module.exports = {
       warnings: true,
       errors: true,
     },
-    after: mockServer(),
   },
   configureWebpack() {
     return {

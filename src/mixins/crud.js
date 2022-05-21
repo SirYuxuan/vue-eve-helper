@@ -1,4 +1,4 @@
-import { doGet as initData, download } from '@/api/curd/crud'
+import { doGet as initData, download } from '@/api/crud/crud'
 import {
   parseTime,
   downloadFile

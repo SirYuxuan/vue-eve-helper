@@ -9,6 +9,17 @@
 @import './transition.scss';
 @import './loading.scss';
 $base: '.vab';
+.rounded-head img{
+  border-radius: 16px;
+  transition: 0.2s !important;
+}
+.rounded-head img:hover{
+  transform: rotate(360deg);
+}
+
+.el-icon-close{
+  top: -3px !important;
+}
 .head-container .filter-item{
   display: inline-block;
   margin: 0 5px 10px 0;

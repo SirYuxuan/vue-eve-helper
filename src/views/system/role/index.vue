@@ -164,7 +164,7 @@
   import UdOperation from '@/components/Crud/UD.operation'
   import DateRangePicker from '@/components/DateRangePicker'
   import Pagination from '@/components/Crud/Pagination'
-  import { doGet } from '@/api/curd/crud'
+  import { doGet } from '@/api/crud/crud'
   const defaultForm = {
     id: null,
     name: null,

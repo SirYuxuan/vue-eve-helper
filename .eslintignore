@@ -1,0 +1,9 @@
+# .eslintignore
+
+src/assets
+src/icons
+public
+dist
+node_modules
+
+src/plugins/modules

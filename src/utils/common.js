@@ -29,7 +29,7 @@ export function toThousands(str) {
       }
       count++
     }
-    str = newStr + '.00' //自动补小数点后两位
+    str = newStr;
     return str
   } else {
     for (i = str.indexOf('.') - 1; i >= 0; i--) {

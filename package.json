@@ -70,6 +70,7 @@
     "zx-verify": "^0.0.2"
   },
   "devDependencies": {
+    "@antv/g2": "^4.2.1",
     "@riophae/vue-treeselect": "^0.4.0",
     "@vue/cli-plugin-babel": "^4.5.13",
     "@vue/cli-plugin-eslint": "^4.5.13",

@@ -138,8 +138,8 @@
       document.body.style.overflow = 'auto'
     },
     mounted() {
-      this.form.username = 'yuxuan'
-      this.form.password = 'yuxuan2012'
+      this.form.username = ''
+      this.form.password = ''
     },
     methods: {
       handlePassword() {

@@ -87,6 +87,7 @@
 
     <el-table
       ref="table"
+      @sort-change="crud.toSort"
       v-loading="crud.loading"
       :data="crud.data"
       @selection-change="crud.selectionChangeHandler"
@@ -107,10 +108,11 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="typeName"
         label="物品名称"
         show-overflow-tooltip
         min-width="150"
+        sortable="custom"
       >
         <template slot-scope="scope">
           <img
@@ -122,8 +124,9 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="price"
         label="价格"
+        sortable
         min-width="110"
         show-overflow-tooltip
       >
@@ -132,7 +135,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="jitaPrice"
         label="市场行情(竞争价/吉他价)"
         show-overflow-tooltip
         min-width="200"
@@ -147,7 +150,7 @@
             "
           >
             <el-tag type="success" effect="dark">
-              市场最{{ scope.row.isBuyOrder ? '高' : '低' }}价
+              市场最{{ scope.row.isBuyOrder ? '高' : '低' }}价 / {{ toThousands(scope.row.jitaPrice) + ' ISK' }}
             </el-tag>
           </div>
           <el-tag v-else type="danger" effect="dark">
@@ -162,26 +165,28 @@
       </el-table-column>
 
       <el-table-column
-        prop="name"
+        prop="volumeTotal"
+        sortable
         label="订单数量"
         show-overflow-tooltip
-        min-width="80"
+        min-width="90"
       >
         <template slot-scope="scope">
           {{ toThousands(scope.row.volumeTotal || 0) }}
         </template>
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="volumeRemain"
+        sortable
         label="剩余数量"
         show-overflow-tooltip
-        min-width="80"
+        min-width="90"
       >
         <template slot-scope="scope">
           {{ toThousands(scope.row.volumeRemain || 0) }}
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="类型" width="80">
+      <el-table-column prop="isBuyOrder" sortable label="类型" width="80">
         <template slot-scope="scope">
           <el-tag type="success" effect="dark">
             {{ scope.row.isBuyOrder ? '收单' : '卖单' }}
@@ -190,19 +195,26 @@
       </el-table-column>
 
       <el-table-column
+        sortable
         prop="locationName"
         label="位置"
         min-width="200"
         show-overflow-tooltip
       />
       <el-table-column
+        sortable
         prop="regionName"
         label="地区"
         min-width="80"
         show-overflow-tooltip
       />
-      <el-table-column prop="issued" label="发布时间" width="150" />
-      <el-table-column prop="createTime" label="更新时间" width="150" />
+      <el-table-column sortable prop="issued" label="发布时间" width="150" />
+      <el-table-column sortable prop="createTime" label="更新时间" width="150" />
+      <el-table-column  label="游戏打开" width="80">
+        <template slot-scope="scope">
+        <el-button icon="el-icon-search" type="primary" size="mini" @click="openWindow(scope.row.id)"></el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <pagination />
   </div>
@@ -257,6 +269,14 @@
       })
     },
     methods: {
+      openWindow(id){
+        this.$baseNotify('正在为您打开中', '提示', 'success')
+        doGet('/accountOrder/openWindow',{id:id})
+          .then((res) => {
+            this.$baseMessage('已为您在游戏中打开', 'success')
+          })
+          .catch((res) => (this.refreshAccountOrderLoading = false))
+      },
       refreshAccountOrder() {
         this.refreshAccountOrderLoading = true
         this.$baseNotify('正在刷新中,请耐心等待...', '提示', 'success')
@@ -274,19 +294,24 @@
             '您确定拥有非00地区订单,且订单不在吉他吗？此操作比较耗时,请耐心等待!',
             '提示',
             () => {
-              this.priceProposalLoading = true
-              this.$baseNotify('正在刷新中,请耐心等待...', '提示', 'success')
-              doGet('/accountOrder/priceProposal?allJita=' + this.allJita)
-                .then((res) => {
-                  this.priceProposalLoading = false
-                  this.$baseMessage('数据同步完成', 'success')
-                  this.crud.toQuery()
-                })
-                .catch((res) => (this.priceProposalLoading = false))
+              this.readRefreshPriceProposal()
             },
             () => (this.allJita = true)
           )
+        }else{
+          this.readRefreshPriceProposal()
         }
+      },
+      readRefreshPriceProposal(){
+        this.priceProposalLoading = true
+        this.$baseNotify('正在刷新中,请耐心等待...', '提示', 'success')
+        doGet('/accountOrder/priceProposal?allJita=' + this.allJita)
+          .then((res) => {
+            this.priceProposalLoading = false
+            this.$baseMessage('数据同步完成', 'success')
+            this.crud.toQuery()
+          })
+          .catch((res) => (this.priceProposalLoading = false))
       },
       toThousands(num) {
         return toThousands(num)

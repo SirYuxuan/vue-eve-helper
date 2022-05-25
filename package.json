@@ -50,6 +50,7 @@
     "lodash": "^4.17.21",
     "maptalks": "^0.49.4",
     "mapv": "^2.0.62",
+    "markdown-it-vue": "^1.1.7",
     "mockjs": "^1.1.0",
     "nprogress": "^0.2.0",
     "qs": "^6.10.1",

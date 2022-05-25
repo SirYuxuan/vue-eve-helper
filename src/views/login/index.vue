@@ -161,11 +161,7 @@
             this.$store
               .dispatch('user/login', param)
               .then(() => {
-                const routerPath =
-                  this.redirect === '/404' || this.redirect === '/401'
-                    ? '/'
-                    : this.redirect
-                this.$router.push(routerPath).catch(() => {})
+                this.$router.push('/index').catch(() => {})
                 this.loading = false
               })
               .catch(() => {

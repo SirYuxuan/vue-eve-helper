@@ -138,6 +138,11 @@ function CRUD(options) {
       crud.page.page = 1
       crud.refresh(callback)
     },
+    // 排序
+    toSort(row){
+      crud.sort[0] = row.prop + ',' + row.order
+      crud.toQuery()
+    },
     // 刷新
     refresh(callback) {
       if (!callVmHook(crud, CRUD.HOOK.beforeRefresh)) {

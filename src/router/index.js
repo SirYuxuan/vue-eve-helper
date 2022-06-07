@@ -66,6 +66,20 @@ export const constantRoutes = [
         meta: { title: '个人中心' ,icon: 'user', }
       }
     ]
+  },
+  {
+    path: '/comment',
+    component: (resolve) => require(['@/layouts'], resolve),
+    hidden: true,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'details',
+        component: (resolve) => require(['@/views/order/comment'], resolve),
+        name: '订单交流',
+        meta: { title: '订单交流' ,icon: 'user', }
+      }
+    ]
   }
 ]
 

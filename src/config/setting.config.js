@@ -18,7 +18,7 @@ const setting = {
   lintOnSave: false,
   // 进行编译的依赖
   transpileDependencies: [],
-  baseURL: 'https://api.evehelper.yuxuan66.com/',
+  baseURL: 'http://localhost:10002/',
   //标题 （包括初次加载雪花屏的标题 页面的标题 浏览器的标题）
   title: 'Yuxuan EVE Helper',
   //简写
@@ -37,7 +37,7 @@ const setting = {
   // 路由模式，可选值为 history 或 hash
   routerMode: 'hash',
   //不经过token校验的路由
-  routesWhiteList: ['/login', '/register', '/404', '/401'],
+  routesWhiteList: ['/login', '/register', '/404', '/401','/showResult'],
   //加载时显示文字
   loadingText: '正在加载中...',
   //token名称

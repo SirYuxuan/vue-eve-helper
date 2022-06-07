@@ -19,7 +19,7 @@ export function setMainAccount(data) {
  */
 export function delAccount(data) {
   return request({
-    url: 'corpUser/delAccount?accountId=' + data,
+    url: 'account/delAccount?accountId=' + data,
     method: 'delete'
   })
 }

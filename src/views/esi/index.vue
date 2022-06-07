@@ -42,12 +42,44 @@
     </vab-query-form>
     <el-table
       ref="table"
-      class="rounded-head"
+      class="rounded-head no-border"
       highlight-current-row
       style="width: 100%"
       :data="data"
+      @sort-change="toSort"
     >
-      <el-table-column prop="title" label="角色名" min-width="100">
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <el-table
+            :data="props.row.accountSkillList"
+            border
+            style="width: 90%; margin-left: 40px; margin: auto"
+          >
+            <el-table-column
+              prop="skillName"
+              label="技能名称"
+            ></el-table-column>
+            <el-table-column
+              prop="startDate"
+              label="开始时间"
+            ></el-table-column>
+            <el-table-column
+              prop="finishDate"
+              label="完成时间"
+            ></el-table-column>
+            <el-table-column
+              prop="finishedLevel"
+              label="完成等级"
+            ></el-table-column>
+          </el-table>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="title"
+        label="角色名"
+        min-width="100"
+        show-overflow-tooltip
+      >
         <template slot-scope="scope">
           <img
             style="vertical-align: middle"
@@ -57,7 +89,12 @@
           <span style="margin-left: 10px">{{ scope.row.characterName }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="legion" label="军团" show-overflow-tooltip min-width="100">
+      <el-table-column
+        prop="legion"
+        label="军团"
+        show-overflow-tooltip
+        min-width="100"
+      >
         <template slot-scope="scope">
           <img
             style="vertical-align: middle"
@@ -69,28 +106,60 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="union" label="联盟" show-overflow-tooltip min-width="100">
+      <el-table-column
+        prop="union"
+        label="所属账号"
+        show-overflow-tooltip
+        min-width="100"
+      >
         <template slot-scope="scope">
-          <img
-            style="vertical-align: middle"
-            :src="`https://images.evetech.net/alliances/${scope.row.allianceId}/logo?size=32`"
-            alt=""
+          <el-input
+            v-model="scope.row.accountName"
+            style="border: 0"
+            @blur="saveAccount(scope.row)"
+            @keyup.enter.native="saveAccount(scope.row)"
           />
-          <span style="margin-left: 10px">
-            {{ scope.row.allianceName || '暂无联盟' }}
-          </span>
         </template>
       </el-table-column>
-      <el-table-column show-overflow-tooltip prop="localName" label="所在建筑" min-width="150" />
-      <el-table-column prop="union" label="驾驶舰船">
+      <el-table-column label="当前技能" show-overflow-tooltip min-width="100">
         <template slot-scope="scope">
-          <img style="vertical-align: middle" :src="`https://images.evetech.net/Type/${scope.row.shipTypeId}_32.png`" alt="">
-          <span style="margin-left: 10px">
-            {{ scope.row.shipTypeName  }}
-          </span>
+          {{ scope.row.skillName }}
         </template>
       </el-table-column>
-      <el-table-column show-overflow-tooltip prop="shipName" min-width="100" label="舰船名称" />
+      <el-table-column
+        prop="skillEndTime"
+        label="技能队列结束时间"
+        show-overflow-tooltip
+        min-width="150"
+        sortable
+      >
+        <template slot-scope="scope">
+          {{ scope.row.skillEndTime }}
+        </template>
+      </el-table-column>
+
+      <el-table-column prop="skillNum" label="制造" min-width="90">
+        <template slot-scope="scope">{{ scope.row.make }} / ?</template>
+      </el-table-column>
+      <el-table-column prop="skillNum" label="科研" min-width="90">
+        <template slot-scope="scope">
+          {{ scope.row.scientificResearch }} / ?
+        </template>
+      </el-table-column>
+      <el-table-column prop="skillNum" label="反应" min-width="90">
+        <template slot-scope="scope">{{ scope.row.reaction }} / ?</template>
+      </el-table-column>
+      <el-table-column prop="dkp" label="主角色">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.isMain"
+            :disabled="scope.row.isMain"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            @change="setMainAccount(scope.row)"
+          ></el-switch>
+        </template>
+      </el-table-column>
       <el-table-column prop="esi" label="ESI状态">
         <template slot-scope="scope">
           <el-tag
@@ -109,17 +178,6 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="ISK" show-overflow-tooltip min-width="100">
-        <template slot-scope="scope">
-          {{ toThousands(scope.row.isk || 0) + ' ISK' }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="skillNum" label="技能点数" min-width="100">
-        <template slot-scope="scope">
-          {{ toThousands(scope.row.skillNum || 0) + ' SP' }}
-        </template>
-      </el-table-column>
-
       <el-table-column prop="dkp" label="操作" width="80">
         <template slot-scope="scope">
           <el-button
@@ -144,9 +202,13 @@
     />
   </div>
 </template>
-
+<style>
+  .no-border .el-input__inner {
+    border: 0 !important;
+  }
+</style>
 <script>
-  import { setMainAccount, delAccount } from '@/api/userAccount/userAccount'
+  import {  delAccount } from '@/api/userAccount/userAccount'
   import { doGet } from '@/api/crud/crud'
   import { toThousands } from '@/utils/common'
   import { getAccessToken } from '@/utils/accessToken'
@@ -164,6 +226,8 @@
         data: [],
         uuid: null,
         load: false,
+        orderBy: 'asc',
+        order: 'skillEndTime',
       }
     },
     created() {
@@ -174,15 +238,35 @@
       handleQuery() {
         this.query()
       },
+      toSort(od) {
+        this.order = od.prop
+        if (od.order === 'descending') {
+          this.orderBy = 'desc'
+        } else {
+          this.orderBy = 'asc'
+        }
+        this.query()
+      },
       query() {
         this.load = true
-        doGet('/account', { page: this.page.page, size: this.page.size }).then(
-          (res) => {
-            this.data = res.data.content
-            this.load = false
-            this.page.total = res.data.totalElements
-          }
-        )
+        doGet('/account', {
+          page: this.page.page,
+          size: this.page.size,
+          order: this.orderBy,
+          orderBy: this.order,
+        }).then((res) => {
+          this.data = res.data.content
+          this.load = false
+          this.page.total = res.data.totalElements
+        })
+      },
+      saveAccount(row) {
+        doGet('/account/setAccountName', {
+          accountId: row.id,
+          accountName: row.accountName,
+        }).then((res) => {
+          this.$baseMessage('账号保存成功', 'success')
+        })
       },
       toAuth() {
         // 授权使用当前的Token
@@ -215,7 +299,7 @@
           type: 'warning',
         })
           .then(() => {
-            setMainAccount(row.id).then((res) => {
+            doGet('/account/setMainAccount',{accountId:row.id}).then((res) => {
               this.$baseMessage('主角色设置成功', 'success')
               this.query()
             })

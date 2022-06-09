@@ -16,6 +16,14 @@
             :value="item.id"
           />
         </el-select>
+        <el-input
+          v-model="query.blurry"
+          clearable
+          placeholder="输入物品名称，位置，角色名搜索"
+          style="width: 250px;margin-left: 10px"
+          class="filter-item"
+          @keyup.enter.native="crud.toQuery"
+        />
         <rr-operation />
       </div>
       <crud-operation :permission="permission">
@@ -25,7 +33,6 @@
             class="filter-item"
             size="mini"
             type="primary"
-            v-show="false"
             icon="el-icon-refresh"
             :loading="refreshMarketTransactionsLoading"
             @click="refreshMarketTransactions()"
@@ -122,7 +129,7 @@
       refreshMarketTransactions() {
         this.refreshMarketTransactionsLoading = true
         this.$baseNotify('正在刷新中,请耐心等待...', '提示', 'success')
-        doGet('/account/refreshMarketTransactions')
+        doGet('/account/refreshPI')
           .then((res) => {
             this.refreshMarketTransactionsLoading = false
             this.$baseMessage('数据同步完成', 'success')

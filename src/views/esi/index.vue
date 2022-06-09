@@ -15,6 +15,29 @@
       </A>
     </el-alert>
 
+    <el-dialog title="功能介绍" :visible.sync="dialogVisible" width="500px">
+      <span>
+        1. 每个角色的可使用线路根据角色技能计算
+        <br />
+        <br />
+        2. 目前每个角色已使用的线路,必须通过军团线获取
+        <br />
+        使用此功能需要拥有主角色、拥有军团制造的使用权
+        <br />
+        <br />
+        3. 如非紧急可不用强制更新数据，系统所有数据每小时更新一次
+        <br />
+        <br />
+        4. 线路统计仅统计当前页面显示的角色,如角色过多请调整分页数据
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">
+          确 定
+        </el-button>
+      </span>
+    </el-dialog>
+
     <vab-query-form>
       <vab-query-form-left-panel>
         <img
@@ -28,13 +51,39 @@
         <el-form ref="form" :inline="true" @submit.native.prevent>
           <el-form-item>
             <el-button
+              icon="el-icon-warning"
+              type="danger"
+              @click="dialogVisible = true"
+            >
+              功能介绍
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="info" @click="skillCount">技能统计</el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="success" @click="lineCount">线路统计</el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              :loading="updateDataLoad"
+              icon="el-icon-search"
+              type="primary"
+              native-type="submit"
+              @click="updateData"
+            >
+              强制更新数据
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button
               :loading="load"
               icon="el-icon-search"
               type="primary"
               native-type="submit"
               @click="handleQuery"
             >
-              刷新数据
+              刷新列表
             </el-button>
           </el-form-item>
         </el-form>
@@ -45,8 +94,8 @@
       class="rounded-head no-border"
       highlight-current-row
       style="width: 100%"
+      stripe
       :data="data"
-      @sort-change="toSort"
     >
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -77,7 +126,7 @@
       <el-table-column
         prop="title"
         label="角色名"
-        min-width="100"
+        min-width="140"
         show-overflow-tooltip
       >
         <template slot-scope="scope">
@@ -93,7 +142,7 @@
         prop="legion"
         label="军团"
         show-overflow-tooltip
-        min-width="100"
+        min-width="120"
       >
         <template slot-scope="scope">
           <img
@@ -107,10 +156,10 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="union"
+        prop="accountName"
         label="所属账号"
         show-overflow-tooltip
-        min-width="100"
+        min-width="130"
       >
         <template slot-scope="scope">
           <el-input
@@ -121,7 +170,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="当前技能" show-overflow-tooltip min-width="100">
+      <el-table-column label="当前技能" show-overflow-tooltip min-width="150">
         <template slot-scope="scope">
           {{ scope.row.skillName }}
         </template>
@@ -130,24 +179,27 @@
         prop="skillEndTime"
         label="技能队列结束时间"
         show-overflow-tooltip
-        min-width="150"
-        sortable
+        min-width="110"
       >
         <template slot-scope="scope">
           {{ scope.row.skillEndTime }}
         </template>
       </el-table-column>
 
-      <el-table-column prop="skillNum" label="制造" min-width="90">
-        <template slot-scope="scope">{{ scope.row.make }} / ?</template>
-      </el-table-column>
-      <el-table-column prop="skillNum" label="科研" min-width="90">
+      <el-table-column prop="skillNum" label="制造" min-width="80">
         <template slot-scope="scope">
-          {{ scope.row.scientificResearch }} / ?
+          {{ scope.row.make }} / {{ scope.row.makeLine }}
         </template>
       </el-table-column>
-      <el-table-column prop="skillNum" label="反应" min-width="90">
-        <template slot-scope="scope">{{ scope.row.reaction }} / ?</template>
+      <el-table-column prop="skillNum" label="科研" min-width="80">
+        <template slot-scope="scope">
+          {{ scope.row.scientificResearch }} / {{ scope.row.scientificLine }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="skillNum" label="反应" min-width="80">
+        <template slot-scope="scope">
+          {{ scope.row.reaction }} / {{ scope.row.reactionLine }}
+        </template>
       </el-table-column>
       <el-table-column prop="dkp" label="主角色">
         <template slot-scope="scope">
@@ -197,6 +249,7 @@
       :current-page.sync="page.page"
       style="margin-top: 8px"
       layout="total, prev, pager, next, sizes"
+      :page-sizes="[10, 50, 100, 1000]"
       @size-change="query"
       @current-change="query"
     />
@@ -208,26 +261,29 @@
   }
 </style>
 <script>
-  import {  delAccount } from '@/api/userAccount/userAccount'
+  import { delAccount } from '@/api/userAccount/userAccount'
   import { doGet } from '@/api/crud/crud'
   import { toThousands } from '@/utils/common'
   import { getAccessToken } from '@/utils/accessToken'
   import { baseURL } from '@/config/setting.config'
+
   export default {
     name: 'Group',
     data() {
       return {
+        dialogVisible: false,
         page: {
           page: 1,
-          size: 10,
+          size: 1000,
         },
         delLoading: false,
         pop: false,
         data: [],
         uuid: null,
         load: false,
+        updateDataLoad: false,
         orderBy: 'asc',
-        order: 'skillEndTime',
+        order: 'accountName',
       }
     },
     created() {
@@ -235,8 +291,84 @@
     },
     mounted() {},
     methods: {
+      skillCount() {
+        let allAccountName = {}
+        this.data.forEach((item) => {
+          if (item.accountName !== '') {
+            allAccountName[item.accountName] = true
+          }
+        })
+        this.data.forEach((item) => {
+          if (item.accountName !== '' && item.skillName !== '') {
+            allAccountName[item.accountName] = false
+          }
+        })
+        let names = ''
+        for (let key in allAccountName) {
+          if (allAccountName[key]) {
+            names += key + '<br>'
+          }
+        }
+        this.$alert(names, '没有学习技能账号清单', { dangerouslyUseHTMLString: true })
+      },
+      lineCount() {
+        let makeLine = 0
+        let scientificLine = 0
+        let reactionLine = 0
+        let makeLineT = 0
+        let scientificLineT = 0
+        let reactionLineT = 0
+        this.data.forEach((item) => {
+          if (item.makeLine !== 1) {
+            makeLine += item.make
+            makeLineT += item.makeLine
+          }
+          if (item.scientificLine !== 1) {
+            scientificLine += item.scientificResearch
+            scientificLineT += item.scientificLine
+          }
+          if (item.reactionLine !== 1) {
+            reactionLine += item.reaction
+            reactionLineT += item.reactionLine
+          }
+
+          this.$alert(
+            '制造：' +
+              makeLine +
+              '/' +
+              makeLineT +
+              '<br>科研：' +
+              scientificLine +
+              '/' +
+              scientificLineT +
+              '<br>反应：' +
+              reactionLine +
+              '/' +
+              reactionLineT,
+            '线路汇总',
+            { dangerouslyUseHTMLString: true }
+          )
+        })
+      },
       handleQuery() {
         this.query()
+      },
+      updateData() {
+        this.$confirm('您确定要强制刷新数据吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }).then(() => {
+          this.updateDataLoad = true
+          this.$baseNotify('正在刷新中,请耐心等待...', '提示', 'success')
+          doGet('/account/refreshAccount')
+            .then((res) => {
+              this.updateDataLoad = false
+              this.$baseMessage('数据同步完成', 'success')
+              this.crud.toQuery()
+            })
+            .catch((res) => (this.updateDataLoad = false))
+        })
       },
       toSort(od) {
         this.order = od.prop
@@ -299,10 +431,12 @@
           type: 'warning',
         })
           .then(() => {
-            doGet('/account/setMainAccount',{accountId:row.id}).then((res) => {
-              this.$baseMessage('主角色设置成功', 'success')
-              this.query()
-            })
+            doGet('/account/setMainAccount', { accountId: row.id }).then(
+              (res) => {
+                this.$baseMessage('主角色设置成功', 'success')
+                this.query()
+              }
+            )
           })
           .catch((res) => {
             row.isMain = !row.isMain

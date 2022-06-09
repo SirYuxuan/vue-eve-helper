@@ -18,7 +18,7 @@ const setting = {
   lintOnSave: false,
   // 进行编译的依赖
   transpileDependencies: [],
-  baseURL: 'http://localhost:10002/',
+  baseURL: 'https://api.evehelper.yuxuan66.com/',
   //标题 （包括初次加载雪花屏的标题 页面的标题 浏览器的标题）
   title: 'Yuxuan EVE Helper',
   //简写

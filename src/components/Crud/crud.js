@@ -17,6 +17,7 @@ function CRUD(options) {
     tag: 'default',
     // id字段名
     idField: 'id',
+    delObj: false,
     // 标题
     title: '',
     // 请求数据的url
@@ -347,7 +348,7 @@ function CRUD(options) {
     doDelete(data) {
       let delAll = false
       let dataStatus
-      const ids = []
+      let ids = []
       if (data instanceof Array) {
         delAll = true
         data.forEach((val) => {
@@ -360,6 +361,12 @@ function CRUD(options) {
       if (!callVmHook(crud, CRUD.HOOK.beforeDelete, data)) {
         return
       }
+
+      if(crud.delObj){
+        ids = data
+      }
+
+
       if (!delAll) {
         dataStatus.delete = CRUD.STATUS.PROCESSING
       }
